@@ -115,6 +115,22 @@ def update_bien(id):
 
     return jsonify({'descripcion': bien.descripcion}), 200
 
+@app.route('/api/datos/cambiarplace/bienes/<int:id>', methods=['PUT'])
+def change_idLugar_bien(id):
+    data = request.get_json()
+    bien = db.session.get(Bien, id)
+
+    if bien is None:
+        return jsonify({'error': 'Bien no encontrado'}), 404
+
+    # Actualizar los campos del bien con los datos recibidos    
+    bien.id_lugar = data.get('id_lugar', bien.id_lugar)
+
+    # Guardar los cambios en la base de datos
+    db.session.commit()
+
+    return jsonify({'descripcion': bien.descripcion}), 200
+
 @app.route('/api/bienes/<int:id>', methods=['PUT'])
 def update_image_from_bien(id):
     try:
