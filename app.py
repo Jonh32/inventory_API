@@ -223,5 +223,32 @@ def add_inventario_bienes():
             'localizado': nuevo_inventario_bien.localizado
         }), 201
 
+@app.route('/api/inventario_bien/cambiarlocated/', methods=['PUT'])
+def change_located_inventario_bien():
+    
+    data = request.get_json()
+    
+    id_inventario = data.get('id_inventario')
+    id_bien = data.get('id_bien')
+
+    if id_inventario is None or id_bien is None:
+        return jsonify({'error': 'Faltan id_inventario o id_bien en el JSON'}), 400
+
+    inventario_bien = db.session.query(InventarioBien).filter_by(id_inventario=id_inventario, id_bien=id_bien).first()
+
+    # Verificar si el registro existe
+    if inventario_bien is None:
+        return jsonify({'error': 'Registro no encontrado'}), 404
+
+    # Actualizar el campo localizado a 1
+    inventario_bien.localizado = 1
+    db.session.commit()
+
+    return jsonify({
+            'message': 'Actualización exitosa',
+            'id_inventario': id_inventario, 
+            'id_bien': id_bien
+        }), 200
+
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
