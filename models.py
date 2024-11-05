@@ -50,6 +50,7 @@ class InventarioBien(Base):
     id_inventario = Column(Integer, ForeignKey('inventario.id'), nullable=False)
     id_bien = Column(Integer, ForeignKey('bien.id'), nullable=False)
     localizado = Column(Integer, nullable=False, default=False)
+    last_modification = Column(String(100), nullable=True)
 
     def __repr__(self):
         return f"<InventarioBien(id={self.id}, id_inventario={self.id_inventario}, id_bien={self.id_bien}, localizado={self.localizado})>"

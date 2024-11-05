@@ -185,7 +185,13 @@ def add_inventario():
 @app.route('/api/inventario_bien', methods=['GET'])
 def get_inventarios_bien():
     inventarios_bien = db.session.query(InventarioBien).all()
-    return jsonify([{'localizado': inventario.localizado, 'id_bien': inventario.id_bien, 'id_inventario': inventario.id_inventario} for inventario in inventarios_bien])
+    return jsonify([
+        {
+            'localizado': inventario.localizado, 
+            'id_bien': inventario.id_bien, 
+            'id_inventario': inventario.id_inventario, 
+            'last_modification': inventario.last_modification}
+              for inventario in inventarios_bien])
 
 @app.route('/api/inventario_bien', methods=['POST'])
 def add_inventario_bienes():
@@ -196,7 +202,8 @@ def add_inventario_bienes():
             nuevo_inventario_bien = InventarioBien(
                 id_inventario=inventario_bien_data['id_inventario'],
                 id_bien=inventario_bien_data['id_bien'],
-                localizado=inventario_bien_data.get('localizado', 0)  # Default is 0 if not provided
+                localizado=inventario_bien_data.get('localizado', 0),  # Default is 0 if not provided
+                last_modification=inventario_bien_data['last_modification']
             )
             db.session.add(nuevo_inventario_bien)
             inventarios_bienes_creados.append(nuevo_inventario_bien)
@@ -205,7 +212,8 @@ def add_inventario_bienes():
             {
                 'id_inventario': inventario_bien.id_inventario,
                 'id_bien': inventario_bien.id_bien,
-                'localizado': inventario_bien.localizado
+                'localizado': inventario_bien.localizado,
+                'last_modification': inventario_bien.last_modification
             }
             for inventario_bien in inventarios_bienes_creados
         ]), 201
@@ -213,14 +221,16 @@ def add_inventario_bienes():
         nuevo_inventario_bien = InventarioBien(
             id_inventario=data['id_inventario'],
             id_bien=data['id_bien'],
-            localizado=data.get('localizado', 0)  # Default is 0 if not provided
+            localizado=data.get('localizado', 0),  # Default is 0 if not provided
+            last_modification=data['last_modification']
         )
         db.session.add(nuevo_inventario_bien)
         db.session.commit()
         return jsonify({
             'id_inventario': nuevo_inventario_bien.id_inventario,
             'id_bien': nuevo_inventario_bien.id_bien,
-            'localizado': nuevo_inventario_bien.localizado
+            'localizado': nuevo_inventario_bien.localizado,
+            'last_modification': nuevo_inventario_bien.last_modification
         }), 201
 
 @app.route('/api/inventario_bien/cambiarlocated/', methods=['PUT'])
@@ -230,6 +240,7 @@ def change_located_inventario_bien():
     
     id_inventario = data.get('id_inventario')
     id_bien = data.get('id_bien')
+    last_modification = data.get('last_modification')
 
     if id_inventario is None or id_bien is None:
         return jsonify({'error': 'Faltan id_inventario o id_bien en el JSON'}), 400
@@ -242,12 +253,14 @@ def change_located_inventario_bien():
 
     # Actualizar el campo localizado a 1
     inventario_bien.localizado = 1
+    inventario_bien.last_modification = last_modification
     db.session.commit()
 
     return jsonify({
             'message': 'Actualización exitosa',
             'id_inventario': id_inventario, 
-            'id_bien': id_bien
+            'id_bien': id_bien,
+            'last_modification': last_modification
         }), 200
 
 if __name__ == '__main__':
